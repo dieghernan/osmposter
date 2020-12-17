@@ -10,17 +10,16 @@ library(magick)
 # 0. Params----
 watercol <- "grey90"
 pdi = 90
-outfile <- "alquife_clean"
-bbox <- poster_bbox(c(-3.125610, 37.173859, -3.098574, 37.197655))
-
+outfile <- "edinburgh_clean"
+bbox <- poster_bbox(c(-3.233100, 55.926318, -3.143836, 55.987229))
+icon <- poster_point(c( -3.1857049,55.9633722)) %>% st_coordinates()
 
 # A. Get shapes----
 
 obj.lines <-
-  poster_import("data/alquife.lines.geojson") %>% poster_lines()
-obj.misc <-
-  poster_import("data/alquife.misc.geojson") %>% poster_polys()
-
+  poster_import("data/ed.lines.geojson") %>% poster_lines()
+obj.water <-
+  poster_import("data/ed.wet.geojson")
 
 # B. Classify----
 
@@ -37,9 +36,9 @@ secondary <-
       "secondary",
       "tertiary",
       "secondary_link",
-      "tertiary_link",
-      "residential",
-      "service"
+      "tertiary_link"
+      # ",residential",
+      # "service"
     )
   )
 
@@ -60,9 +59,11 @@ terciary <-
 
 # Others - Specific
 
-quarry <- obj.misc %>% filter(landuse %in% c("quarry"))
-forest <- obj.misc %>% filter(landuse %in% c("forest"))
-water <- obj.misc %>% filter(!is.na(water))
+waterlines <- obj.water %>% poster_lines()
+waterbody <- obj.water %>% poster_polys()
+
+
+
 
 # C. SVG file ----
 
@@ -78,19 +79,20 @@ svg(
 )
 par(mar = c(0, 0, 0, 0))
 plot_sf(bbox)
+plot(
+  st_geometry(waterlines),
+  add = TRUE,
+  col = watercol,
+  border = watercol,
+  lwd = 12
+)
 
-plot(st_geometry(water),
-     add = TRUE,
-     col = watercol,
-     border = watercol)
-plot(st_geometry(quarry),
-     add = TRUE,
-     col = "grey85",
-     border = "grey85")
-plot(st_geometry(forest),
-     add = TRUE,
-     col = "grey80",
-     border = "grey80")
+plot(
+  st_geometry(waterbody),
+  add = TRUE,
+  col = watercol,
+  border = NA
+)
 
 plot(st_geometry(terciary),
      col = "grey50",
@@ -105,6 +107,15 @@ plot(st_geometry(primary),
      add = TRUE,
      lwd = 3.5)
 
+text(
+  x = icon[1],
+  y = icon[2],
+  labels = fontawesome("fa-home"),
+  cex = 0.7,
+  col = 'black',
+  family = 'fontawesome-webfont'
+  )
+
 dev.off()
 
 # Convert to png
@@ -113,8 +124,6 @@ pnggout <- file.path("images", paste0(outfile, ".png"))
 my_image <- image_read(svgout)
 my_svg <- image_convert(my_image, format = "png")
 image_write(my_svg, pnggout)
-
-
 
 
 # D. JPEG file ----
@@ -129,19 +138,20 @@ jpeg(jpegout,
      height = 4200)
 par(mar = c(0, 0, 0, 0))
 plot_sf(bbox)
+plot(
+  st_geometry(waterlines),
+  add = TRUE,
+  col = watercol,
+  border = watercol,
+  lwd = 12
+)
 
-plot(st_geometry(water),
-     add = TRUE,
-     col = watercol,
-     border = watercol)
-plot(st_geometry(quarry),
-     add = TRUE,
-     col = "grey85",
-     border = "grey85")
-plot(st_geometry(forest),
-     add = TRUE,
-     col = "grey80",
-     border = "grey80")
+plot(
+  st_geometry(waterbody),
+  add = TRUE,
+  col = watercol,
+  border = NA
+)
 
 plot(st_geometry(terciary),
      col = "grey50",
@@ -155,5 +165,14 @@ plot(st_geometry(primary),
      col = "grey20",
      add = TRUE,
      lwd = 3.5)
+
+text(
+  x = icon[1],
+  y = icon[2],
+  labels = fontawesome("fa-home"),
+  cex = 7,
+  col = 'black',
+  family = 'fontawesome-webfont'
+)
 
 dev.off()

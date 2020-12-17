@@ -1,65 +1,144 @@
+rm(list = ls())
+
+source("R/utils.R")
+
 library(sf)
-
 library(dplyr)
+library(emojifont)
+library(magick)
 
+# 0. Params----
+watercol <- "grey90"
+pdi = 90
+outfile <- "menorca_turq"
 color <- "#60c1ca" # Aquamarine
-
-menorca.pol <- st_read("data/menorca.pol.geojson")
-menorca.pol <-
-  menorca.pol[st_geometry_type(menorca.pol) == "MULTIPOLYGON",]
-
-menorca.lines <-
-  st_read("data/menorca.lines.geojson", stringsAsFactors = FALSE)
-menorca.lines <-
-  menorca.lines[st_geometry_type(menorca.lines) == "LINESTRING",]
-
-
 tuq <- colorRampPalette(c("white", "#60c1ca"))(10)
 
+# A. Get shapes----
 
-scales::show_col(tuq)
+obj.lines <-
+  poster_import("data/menorca.lines.geojson") %>% poster_lines()
 
-base <- menorca.pol
+obj.pol <-
+  poster_import("data/menorca.pol.geojson") %>% poster_polys()
 
-aa <-
-  menorca.lines %>% st_drop_geometry()%>% group_by(highway) %>% summarise(n2 = n()) %>% arrange(n2)
+# B. Classify----
+
+# Lines
 
 primary <-
-  menorca.lines %>%
+  obj.lines %>%
   filter(highway %in%  c("motorway", "primary", "motorway_link", "primary_link"))
 
+# Add residential and service in small places
 secondary <-
-  menorca.lines %>% filter(highway %in%  c("secondary", "tertiary", "secondary_link", "tertiary_link"))
+  obj.lines %>% filter(
+    highway %in%  c(
+      "secondary",
+      "tertiary",
+      "secondary_link",
+      "tertiary_link"
+      # ",residential",
+      # "service"
+    )
+  )
 
 terciary <-
-  menorca.lines %>% filter(highway %in%  c(
-    "path",
-    "track"
-  ))
+  obj.lines %>% filter(
+    !highway %in%  c(
+      "motorway",
+      "primary",
+      "motorway_link",
+      "primary_link",
+      "secondary",
+      "tertiary",
+      "secondary_link",
+      "tertiary_link"
+    )
+  )
 
+# C. SVG file ----
 
-st_centroid(menorca.pol)
+svgout <- file.path("images", paste0(outfile, ".svg"))
 
-pdi <- 90
+bbox <- obj.pol
 
 svg(
-  paste0("images/menorca_turq.svg"),
+  svgout,
   pointsize = pdi,
-  width =  2970 / pdi,
-  height = 2100 / pdi,
-  bg = NA
+  width =  4200 / pdi,
+  height = 2970 / pdi,
+  bg = tuq[5]
 )
 
-par(mar=c(0,0,0,0))
-plot(st_geometry(base), border = NA, col = tuq[9])
-plot(st_geometry(primary), col = tuq[1], add = TRUE, lwd=3)
-plot(st_geometry(secondary), col = tuq[2], add = TRUE, lwd=2)
-plot(st_geometry(terciary), col = tuq[3], add = TRUE, lwd=1.5)
+
+
+par(mar = c(0, 0, 0, 0))
+plot_sf(bbox)
+plot(
+  st_geometry(obj.pol),
+  add = TRUE,
+  col = "#60c1ca",
+  border = NA
+)
+
+plot(st_geometry(terciary),
+     col = tuq[3],
+     add = TRUE,
+     lwd = 0.75)
+plot(st_geometry(secondary),
+     col = tuq[2],
+     add = TRUE,
+     lwd = 2.5)
+plot(st_geometry(primary),
+     col = tuq[1],
+     add = TRUE,
+     lwd = 3.5)
+
 
 dev.off()
 
-col2rgb(tuq[5])
-col2rgb("#43878D")
-  
+# Convert to png
 
-rsvg::rsvg_png("images/menorca_turq.svg","images/menorca_turq.png")
+pnggout <- file.path("images", paste0(outfile, ".png"))
+my_image <- image_read(svgout)
+my_svg <- image_convert(my_image, format = "png")
+image_write(my_svg, pnggout)
+
+
+# D. JPEG file ----
+
+jpegout <- file.path("images", paste0(outfile, ".jpeg"))
+
+jpeg(jpegout,
+     res = 300,
+     bg = tuq[5],
+     width =  4200 ,
+     height = 2970)
+
+par(mar = c(0, 0, 0, 0))
+plot_sf(bbox)
+plot(
+  st_geometry(obj.pol),
+  add = TRUE,
+  col = "#60c1ca",
+  border = NA
+)
+
+plot(st_geometry(terciary),
+     col = tuq[3],
+     add = TRUE,
+     lwd = 0.75)
+plot(st_geometry(secondary),
+     col = tuq[2],
+     add = TRUE,
+     lwd = 2.5)
+plot(st_geometry(primary),
+     col = tuq[1],
+     add = TRUE,
+     lwd = 3.5)
+
+
+dev.off()
+
+╩

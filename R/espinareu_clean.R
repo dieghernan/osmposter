@@ -8,19 +8,22 @@ library(emojifont)
 library(magick)
 
 # 0. Params----
-watercol <- "grey90"
 pdi = 90
-outfile <- "alquife_clean"
-bbox <- poster_bbox(c(-3.125610, 37.173859, -3.098574, 37.197655))
-
+outfile <- "espinareu_clean"
+watercol <- "grey90"
+bbox <- poster_bbox( c(-5.364573, 43.29762, -5.361857, 43.30207))
 
 # A. Get shapes----
+obj.init <-
+  poster_import("data/espinareu.lines.geojson") 
 
-obj.lines <-
-  poster_import("data/alquife.lines.geojson") %>% poster_lines()
-obj.misc <-
-  poster_import("data/alquife.misc.geojson") %>% poster_polys()
+obj.lines <- poster_lines(obj.init)
+obj.pols <- poster_polys(obj.init)
 
+obj.landuse <-
+  poster_import("data/espinareu.landuse.geojson") %>% poster_polys()
+
+obj.water <- poster_import("data/espinareu.water.geojson")
 
 # B. Classify----
 
@@ -28,7 +31,7 @@ obj.misc <-
 
 primary <-
   obj.lines %>%
-  filter(highway %in%  c("motorway", "primary", "motorway_link", "primary_link"))
+  filter(highway %in%  c("motorway", "primary", "motorway_link", "primary_link","tertiary"))
 
 # Add residential and service in small places
 secondary <-
@@ -53,16 +56,15 @@ terciary <-
       "secondary",
       "tertiary",
       "secondary_link",
-      "tertiary_link"
+      "tertiary_link",
+      "residential",
+      "service"
     )
   )
 
+residential <- obj.landuse %>% filter(landuse != "forest")
+forest <- obj.landuse %>% filter(landuse == "forest")
 
-# Others - Specific
-
-quarry <- obj.misc %>% filter(landuse %in% c("quarry"))
-forest <- obj.misc %>% filter(landuse %in% c("forest"))
-water <- obj.misc %>% filter(!is.na(water))
 
 # C. SVG file ----
 
@@ -79,18 +81,19 @@ svg(
 par(mar = c(0, 0, 0, 0))
 plot_sf(bbox)
 
-plot(st_geometry(water),
-     add = TRUE,
-     col = watercol,
-     border = watercol)
-plot(st_geometry(quarry),
-     add = TRUE,
-     col = "grey85",
-     border = "grey85")
-plot(st_geometry(forest),
-     add = TRUE,
-     col = "grey80",
-     border = "grey80")
+
+plot(st_geometry(residential),
+     col = "grey95",
+     border = "grey95",
+     add = TRUE)
+
+plot(
+  st_geometry(obj.water),
+  add = TRUE,
+  col = watercol,
+  border = watercol,
+  lwd = 20
+)
 
 plot(st_geometry(terciary),
      col = "grey50",
@@ -105,6 +108,13 @@ plot(st_geometry(primary),
      add = TRUE,
      lwd = 3.5)
 
+plot(
+  st_geometry(obj.pols),
+  add = TRUE,
+  border = "grey60",
+  col = "grey60",
+  lwd = 2
+)
 dev.off()
 
 # Convert to png
@@ -119,6 +129,7 @@ image_write(my_svg, pnggout)
 
 # D. JPEG file ----
 
+
 jpegout <- file.path("images", paste0(outfile, ".jpeg"))
 
 
@@ -130,18 +141,18 @@ jpeg(jpegout,
 par(mar = c(0, 0, 0, 0))
 plot_sf(bbox)
 
-plot(st_geometry(water),
-     add = TRUE,
-     col = watercol,
-     border = watercol)
-plot(st_geometry(quarry),
-     add = TRUE,
-     col = "grey85",
-     border = "grey85")
-plot(st_geometry(forest),
-     add = TRUE,
-     col = "grey80",
-     border = "grey80")
+plot(st_geometry(residential),
+     col = "grey95",
+     border = "grey95",
+     add = TRUE)
+
+plot(
+  st_geometry(obj.water),
+  add = TRUE,
+  col = watercol,
+  border = watercol,
+  lwd = 20
+)
 
 plot(st_geometry(terciary),
      col = "grey50",
@@ -155,5 +166,13 @@ plot(st_geometry(primary),
      col = "grey20",
      add = TRUE,
      lwd = 3.5)
+
+plot(
+  st_geometry(obj.pols),
+  add = TRUE,
+  border = "grey60",
+  col = "grey60",
+  lwd = 2
+)
 
 dev.off()

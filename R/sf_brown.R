@@ -1,55 +1,125 @@
+rm(list = ls())
+
+source("R/utils.R")
+
 library(sf)
 library(dplyr)
+library(emojifont)
+library(magick)
+
+# 0. Params----
+pdi = 90
+outfile <- "sf_brown"
 
 
-sf.lines <-
-  st_read("data/sf.lines.geojson", stringsAsFactors = FALSE)
-sf.lines <-
-  sf.lines[st_geometry_type(sf.lines) == "LINESTRING", ]
+# A. Get shapes----
 
-aa <-
-  sf.lines %>% st_drop_geometry() %>% group_by(highway) %>% 
-  summarise(n2 = n()) %>% arrange(n2)
+obj.lines <-
+  poster_import("data/sf.lines.geojson") %>% poster_lines()
 
+# B. Classify----
+
+# Lines
 
 primary <-
-  sf.lines %>%
-  filter(highway %in%  c("motorway", "primary", 
-                         "motorway_link", "primary_link"))
+  obj.lines %>%
+  filter(highway %in%  c("motorway", "primary", "motorway_link", "primary_link"))
 
+# Add residential and service in small places
 secondary <-
-  sf.lines %>% filter(highway %in%  c("secondary", "tertiary", 
-                                      "secondary_link", "tertiary_link"))
+  obj.lines %>% filter(highway %in%  c("secondary",
+                                       "tertiary",
+                                       "secondary_link",
+                                       "tertiary_link"))
 
 terciary <-
-  sf.lines %>% filter(highway %in%  c("residential",
-                                      "footway",
-                                      "service"))
+  obj.lines %>% filter(
+    !highway %in%  c(
+      "motorway",
+      "primary",
+      "motorway_link",
+      "primary_link",
+      "secondary",
+      "tertiary",
+      "secondary_link",
+      "tertiary_link"
+    )
+  )
 
-col2rgb("#F7F2E8")
 
-pdi = 90
+
+# C. SVG file ----
+
+svgout <-
+  file.path("images", paste0(outfile, ".svg"))
+
+bbox <- obj.lines
+
 svg(
-  paste0("images/sf_brown.svg"),
+  svgout,
   pointsize = pdi,
-  width =  2100 / pdi,
-  height = 2970 / pdi,
-  bg = NA
+  width =  2970 / pdi,
+  height = 4200 / pdi,
+  bg = "#f7f2e8"
 )
+par(mar = c(0, 0, 0, 0))
+plot_sf(bbox)
 
-par(mar = c(0, 0, 0, 0), bg = "#F7F2E8")
-plot(st_geometry(primary), col = "#2a1506", lwd = 3)
-plot(st_geometry(secondary),
-     col = "#800000",
-     add = TRUE,
-     lwd = 2)
 plot(st_geometry(terciary),
      col = "#8B4513",
      add = TRUE,
-     lwd = 1.5)
+     lwd = 0.75)
+plot(st_geometry(secondary),
+     col = "#800000",
+     add = TRUE,
+     lwd = 2.5)
+plot(st_geometry(primary),
+     col = "#2a1506",
+     add = TRUE,
+     lwd = 3.5)
 
 dev.off()
 
-rsvg::rsvg_png("images/sf_brown.svg", "images/sf_brown.png")
+# Convert to png
 
-col2rgb("#800000")
+pnggout <-
+  file.path("images", paste0(outfile, ".png"))
+my_image <- image_read(svgout)
+my_svg <-
+  image_convert(my_image, format = "png")
+image_write(my_svg, pnggout)
+
+# D. JPEG file ----
+
+jpegout <-
+  file.path("images", paste0(outfile, ".jpeg"))
+
+
+
+jpeg(jpegout,
+     res = 300,
+     bg = "#f7f2e8",
+     width =  4200 ,
+     height = 2970)
+
+
+par(mar = c(0, 0, 0, 0))
+plot_sf(bbox)
+
+plot(st_geometry(terciary),
+     col = "#8B4513",
+     add = TRUE,
+     lwd = 0.75)
+plot(st_geometry(secondary),
+     col = "#800000",
+     add = TRUE,
+     lwd = 2.5)
+plot(st_geometry(primary),
+     col = "#2a1506",
+     add = TRUE,
+     lwd = 3.5)
+
+dev.off()
+
+
+
