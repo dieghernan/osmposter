@@ -24,11 +24,10 @@ obj.pol <- poster_polys(obj.init)
 obj.selpol <-
   poster_polys(obj.init) %>% filter(is.na(highway)) %>% filter(!landuse %in% c("residential"))
 
-obj.place <-
-  obj.init %>% filter(name == "Fuente Pelencha") %>%
-  st_cast("POINT") %>% 
-  st_buffer(3, endCapStyle = "SQUARE") %>% 
-  bind_rows(obj.selpol)
+icon <-
+  obj.init %>% filter(name == "Fuente Pelencha") %>% st_coordinates()
+
+
 
 
 # B. Classify----
@@ -87,12 +86,12 @@ plot(st_geometry(obj.water),
      add = TRUE,
      col = watercol,
      border = watercol,
-     lwd = 8)
+     lwd = 15)
 
-plot(st_geometry(obj.place),
-     col="grey60",
-     border = "grey60",
-     add =TRUE)
+# plot(st_geometry(obj.place),
+#      col="grey60",
+#      border = "grey60",
+#      add =TRUE)
 
 plot(st_geometry(terciary),
      col = "grey50",
@@ -107,7 +106,14 @@ plot(st_geometry(primary),
      add = TRUE,
      lwd = 5)
 
-
+text(
+  x = icon[1],
+  y = icon[2],
+  labels = fontawesome("fa-circle"),
+  cex = 0.3,
+  col = 'grey70',
+  family = 'fontawesome-webfont'
+)
 
 dev.off()
 
@@ -139,10 +145,10 @@ plot(st_geometry(obj.water),
      border = watercol,
      lwd = 8)
 
-plot(st_geometry(obj.place),
-     col="grey60",
-     border = "grey60",
-     add =TRUE)
+# plot(st_geometry(obj.place),
+#      col="grey60",
+#      border = "grey60",
+#      add =TRUE)
 
 plot(st_geometry(terciary),
      col = "grey50",
@@ -156,6 +162,15 @@ plot(st_geometry(primary),
      col = "grey20",
      add = TRUE,
      lwd = 5)
+
+text(
+  x = icon[1],
+  y = icon[2],
+  labels = fontawesome("fa-circle"),
+  cex = 0.7,
+  col = 'black',
+  family = 'fontawesome-webfont'
+)
 
 
 dev.off()

@@ -12,7 +12,7 @@ watercol <- "grey90"
 pdi = 90
 outfile <- "menorca_turq"
 color <- "#60c1ca" # Aquamarine
-tuq <- colorRampPalette(c("white", "#60c1ca"))(10)
+
 
 # A. Get shapes----
 
@@ -68,7 +68,7 @@ svg(
   pointsize = pdi,
   width =  4200 / pdi,
   height = 2970 / pdi,
-  bg = tuq[5]
+  bg = NA
 )
 
 
@@ -83,15 +83,15 @@ plot(
 )
 
 plot(st_geometry(terciary),
-     col = tuq[3],
+     col = adjustcolor("white", alpha.f = .5),
      add = TRUE,
      lwd = 0.75)
 plot(st_geometry(secondary),
-     col = tuq[2],
+     col = adjustcolor("white", alpha.f = .6),
      add = TRUE,
      lwd = 2.5)
 plot(st_geometry(primary),
-     col = tuq[1],
+     col = adjustcolor("white", alpha.f = .8),
      add = TRUE,
      lwd = 3.5)
 
@@ -126,19 +126,19 @@ plot(
 )
 
 plot(st_geometry(terciary),
-     col = tuq[3],
+     col = adjustcolor("white", alpha.f = .5),
      add = TRUE,
      lwd = 0.75)
 plot(st_geometry(secondary),
-     col = tuq[2],
+     col = adjustcolor("white", alpha.f = .6),
      add = TRUE,
      lwd = 2.5)
 plot(st_geometry(primary),
-     col = tuq[1],
+     col = adjustcolor("white", alpha.f = .8),
      add = TRUE,
      lwd = 3.5)
 
 
 dev.off()
 
-╩
+

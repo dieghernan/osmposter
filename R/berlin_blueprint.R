@@ -6,16 +6,18 @@ library(sf)
 library(dplyr)
 library(emojifont)
 library(magick)
+library(osmdata)
 
 # 0. Params----
 watercol <- "grey90"
 pdi = 90
 outfile <- "berlin_blueprint"
 bbox <- poster_bbox(c(13.24, 52.399067, 13.53, 52.61))
-
+icon <- poster_point(c( 13.415576123483612,52.525137895536055)) %>% st_coordinates()
 
 
 # A. Get shapes----
+
 
 primary <-
   poster_import("data/berlin.primary.geojson") %>% poster_lines()
@@ -85,6 +87,15 @@ plot(
   border = adjustcolor("white", alpha.f = .8),
   add = TRUE,
   lwd = 3.5
+)
+
+text(
+  x = icon[1],
+  y = icon[2],
+  labels = fontawesome("fa-map-marker"),
+  cex = 1.2,
+  col = 'grey10',
+  family = 'fontawesome-webfont'
 )
 
 

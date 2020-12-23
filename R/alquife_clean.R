@@ -83,10 +83,7 @@ plot(st_geometry(water),
      add = TRUE,
      col = watercol,
      border = watercol)
-plot(st_geometry(quarry),
-     add = TRUE,
-     col = "grey85",
-     border = "grey85")
+
 plot(st_geometry(forest),
      add = TRUE,
      col = "grey80",
@@ -134,10 +131,7 @@ plot(st_geometry(water),
      add = TRUE,
      col = watercol,
      border = watercol)
-plot(st_geometry(quarry),
-     add = TRUE,
-     col = "grey85",
-     border = "grey85")
+
 plot(st_geometry(forest),
      add = TRUE,
      col = "grey80",

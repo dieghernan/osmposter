@@ -25,6 +25,10 @@ obj.landuse <-
 
 obj.water <- poster_import("data/espinareu.water.geojson")
 
+obj.catastro <- poster_import("data/espinareu.catastro.kml")
+
+obj.horreos <- poster_import("data/espinareu.horreos.gml")
+
 # B. Classify----
 
 # Lines
@@ -79,12 +83,12 @@ svg(
   height = 4200 / pdi
 )
 par(mar = c(0, 0, 0, 0))
-plot_sf(bbox)
+plot_sf(bbox, col =NA, border = NA)
 
 
-plot(st_geometry(residential),
-     col = "grey95",
-     border = "grey95",
+plot(st_geometry(obj.catastro),
+     col = "grey85",
+     border = NA,
      add = TRUE)
 
 plot(
@@ -108,13 +112,9 @@ plot(st_geometry(primary),
      add = TRUE,
      lwd = 3.5)
 
-plot(
-  st_geometry(obj.pols),
-  add = TRUE,
-  border = "grey60",
-  col = "grey60",
-  lwd = 2
-)
+plot(st_geometry(obj.horreos), col="grey10", border = NA, add = TRUE)
+
+
 dev.off()
 
 # Convert to png
@@ -138,12 +138,15 @@ jpeg(jpegout,
      res = 300,
      width =  2970 ,
      height = 4200)
+
+
 par(mar = c(0, 0, 0, 0))
 plot_sf(bbox)
 
-plot(st_geometry(residential),
-     col = "grey95",
-     border = "grey95",
+
+plot(st_geometry(obj.catastro),
+     col = "grey85",
+     border = NA,
      add = TRUE)
 
 plot(
@@ -167,12 +170,6 @@ plot(st_geometry(primary),
      add = TRUE,
      lwd = 3.5)
 
-plot(
-  st_geometry(obj.pols),
-  add = TRUE,
-  border = "grey60",
-  col = "grey60",
-  lwd = 2
-)
+plot(st_geometry(obj.horreos), col="grey10", border = NA, add = TRUE)
 
 dev.off()

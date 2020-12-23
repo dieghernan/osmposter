@@ -4,12 +4,15 @@ source("R/utils.R")
 
 library(sf)
 library(dplyr)
-library(emojifont)
+#library(emojifont)
 library(magick)
+library(tmap)
 
 # 0. Params----
 pdi = 90
 outfile <- "lashuelgas_sand"
+windowsFonts(josefin = "Josefin Sans")
+
 
 #bbox <- poster_bbox(c(-4.474440,41.045634,-4.463711,41.055667))
 
@@ -77,14 +80,17 @@ svg(
   pointsize = pdi,
   width =  2970 / pdi,
   height = 4200 / pdi,
-  bg = "#F9F5F1"
+  bg = "#F9F5F1",family = "josefin"
 )
+
+par(family = "josefin")
+
 
 map <-
   tm_shape(obj.garden, bbox = st_buffer(barrier_end, 25)) +
   tm_fill(col = "#E0CAB8") +
   tm_borders(col = "#F9F5F1", lwd = 2.5) + 
-  tm_layout(frame = FALSE, bg.color = "#F9F5F1") +
+  tm_layout(frame = FALSE, bg.color = "#F9F5F1", fontfamily = "josefin") +
   tm_compass(type = "8star",
              position = c("right", "top"),
              color.dark = "#995518",
@@ -118,14 +124,17 @@ jpegout <- file.path("images", paste0(outfile, ".jpeg"))
 
 jpeg(jpegout,
      res = 300,
+     family = "josefin",
      width =  2970 ,
      height = 4200)
+par(family = "josefin")
+
 
 map <-
   tm_shape(obj.garden, bbox = st_buffer(barrier_end, 25)) +
   tm_fill(col = "#E0CAB8") +
   tm_borders(col = "#F9F5F1", lwd = 2.5) + 
-  tm_layout(frame = FALSE, bg.color = "#F9F5F1") +
+  tm_layout(frame = FALSE, bg.color = "#F9F5F1", fontfamily = "josefin") +
   tm_compass(type = "8star",
              position = c("right","top"),
              color.dark = "#995518",
@@ -133,7 +142,6 @@ map <-
              text.color = "#995518",
              show.labels = 0,
              size=9)
-
 
 map + tm_shape(pols) + tm_sf(
   col = adjustcolor("#C29570", alpha.f = 0.7),
@@ -143,5 +151,6 @@ map + tm_shape(pols) + tm_sf(
   tm_shape(barrier_end) + tm_sf(  col = adjustcolor("#995518", alpha.f = 0.7),
                                   lwd = 15)
 
+map
 dev.off()
 
